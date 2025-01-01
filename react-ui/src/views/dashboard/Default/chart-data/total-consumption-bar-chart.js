@@ -1,4 +1,4 @@
-//-----------------------|| DASHBOARD - TOTAL GROWTH BAR CHART ||-----------------------//
+import { useEffect, useState } from 'react';
 
 const chartData = {
     height: 480,
@@ -34,7 +34,7 @@ const chartData = {
         },
         xaxis: {
             type: 'category',
-            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            categories: []  // This will be updated with the fetched data
         },
         legend: {
             show: true,
@@ -67,21 +67,37 @@ const chartData = {
     },
     series: [
         {
-            name: 'Investment',
-            data: [35, 125, 35, 35, 35, 80, 35, 20, 35, 45, 15, 75]
-        },
-        {
-            name: 'Loss',
-            data: [35, 15, 15, 35, 65, 40, 80, 25, 15, 85, 25, 75]
-        },
-        {
-            name: 'Profit',
-            data: [35, 145, 35, 35, 20, 105, 100, 10, 65, 45, 30, 10]
-        },
-        {
-            name: 'Maintenance',
-            data: [0, 0, 75, 0, 0, 115, 0, 0, 0, 0, 150, 0]
+            name: 'Consumption',
+            data: []  // This will be updated with the fetched data
         }
     ]
 };
+
+export const useFetchConsumptionData = () => {
+    const [consumptionData, setConsumptionData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchConsumptionData = async () => {
+            try {
+                const response = await fetch('/api/consumption');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('Fetched consumption data:', data); // Log the fetched data
+                setConsumptionData(data);
+            } catch (error) {
+                console.error('Error fetching consumption data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchConsumptionData();
+    }, []);
+
+    return { consumptionData, isLoading };
+};
+
 export default chartData;

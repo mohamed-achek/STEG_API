@@ -1,4 +1,3 @@
-
 from datetime import datetime
 import json
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -19,7 +18,6 @@ class User(db.Model):
     bills = db.relationship('Bill', backref='user', lazy=True)
     payments = db.relationship('Payment', backref='user', lazy=True)
     consumption_data = db.relationship('ConsumptionData', backref='user', lazy=True)
-    appliance_insights = db.relationship('ApplianceInsight', backref='user', lazy=True)
 
     # New methods
     def __repr__(self):
@@ -111,23 +109,7 @@ class Outage(db.Model):
     description = db.Column(db.Text)
     status = db.Column(db.String(50), default='Ongoing')
 
-class ApplianceInsight(db.Model):
-    __tablename__ = 'appliance_insights'
-    
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    appliance_name = db.Column(db.String(100), nullable=False)
-    energy_usage = db.Column(db.Numeric(10, 2), nullable=False)
-    estimated_cost = db.Column(db.Numeric(10, 2))
-    usage_date = db.Column(db.Date, nullable=False)
 
-class MaintenanceReport(db.Model):
-    __tablename__ = 'maintenance_reports'
-    
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    report_date = db.Column(db.DateTime, default=db.func.current_timestamp())
-    description = db.Column(db.Text)
-    status = db.Column(db.String(50), default='Pending')
 
 class JWTTokenBlocklist(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -21,7 +21,7 @@ import {
 
 // assets
 import { IconBrandTelegram, IconBuildingStore, IconMailbox, IconPhoto } from '@tabler/icons';
-import User1 from './../../../../assets/images/users/user-round.svg';
+import User1 from './../../../../assets/images/users/user.png';
 
 // style constant
 const useStyles = makeStyles((theme) => ({

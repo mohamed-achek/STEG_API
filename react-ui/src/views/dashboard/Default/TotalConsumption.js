@@ -14,7 +14,7 @@ import MainCard from '../../../ui-component/cards/MainCard';
 import { gridSpacing } from '../../../store/constant';
 
 // chart data
-import chartData from './chart-data/total-growth-bar-chart';
+import chartData, { useFetchConsumptionData } from './chart-data/total-consumption-bar-chart';
 
 const status = [
     {
@@ -33,9 +33,10 @@ const status = [
 
 //-----------------------|| DASHBOARD DEFAULT - TOTAL GROWTH BAR CHART ||-----------------------//
 
-const TotalGrowthBarChart = ({ isLoading }) => {
+const TotalGrowthBarChart = () => {
     const [value, setValue] = React.useState('today');
     const theme = useTheme();
+    const { consumptionData, isLoading } = useFetchConsumptionData();
 
     const primary = theme.palette.text.primary;
     const grey200 = theme.palette.grey[200];
@@ -77,11 +78,21 @@ const TotalGrowthBarChart = ({ isLoading }) => {
             }
         };
 
+        // Update the series data with the fetched consumption data
+        const seriesData = consumptionData.map(item => parseFloat(item.consumption));
+        console.log('Series data for chart:', seriesData); // Log the series data
+        newChartData.series = [
+            {
+                name: 'Consumption',
+                data: seriesData
+            }
+        ];
+
         // do not load chart when loading
         if (!isLoading) {
             ApexCharts.exec(`bar-chart`, 'updateOptions', newChartData);
         }
-    }, [primary200, primaryDark, secondaryMain, secondaryLight, primary, grey200, isLoading, grey500]);
+    }, [primary200, primaryDark, secondaryMain, secondaryLight, primary, grey200, isLoading, grey500, consumptionData]);
 
     return (
         <React.Fragment>
@@ -95,10 +106,12 @@ const TotalGrowthBarChart = ({ isLoading }) => {
                                 <Grid item>
                                     <Grid container direction="column" spacing={1}>
                                         <Grid item>
-                                            <Typography variant="subtitle2">Total Growth</Typography>
+                                            <Typography variant="subtitle2">Total Consumption</Typography>
                                         </Grid>
                                         <Grid item>
-                                            <Typography variant="h3">$2,324.00</Typography>
+                                            <Typography variant="h3">
+                                                kWh {consumptionData.reduce((total, item) => total + parseFloat(item.consumption), 0).toFixed(2)}
+                                            </Typography>
                                         </Grid>
                                     </Grid>
                                 </Grid>
