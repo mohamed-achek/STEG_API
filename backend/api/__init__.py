@@ -19,7 +19,7 @@ rest_api.init_app(app)
 CORS(app)
 
 # Setup database
-@app.before_first_request
+@app.before_request
 def initialize_database():
     try:
         db.create_all()
