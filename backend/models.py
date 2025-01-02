@@ -108,8 +108,7 @@ class Outage(db.Model):
     end_time = db.Column(db.DateTime)
     description = db.Column(db.Text)
     status = db.Column(db.String(50), default='Ongoing')
-
-
+    heatmapdata = db.Column(db.JSON, nullable=True)  # Add heatmapdata column
 
 class JWTTokenBlocklist(db.Model):
     id = db.Column(db.Integer, primary_key=True)

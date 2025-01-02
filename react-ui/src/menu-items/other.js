@@ -1,11 +1,13 @@
 // assets
 import { IconBrandChrome, IconHelp, IconSitemap } from '@tabler/icons';
+import OutageIcon from './../assets/images/icons/outage.png';
 
 // constant
 const icons = {
     IconBrandChrome: IconBrandChrome,
     IconHelp: IconHelp,
-    IconSitemap: IconSitemap
+    IconSitemap: IconSitemap,
+    OutageIcon: () => <img src={OutageIcon} alt="Outage Icon" style={{ width: '24px', height: '24px' }} />
 };
 
 //-----------------------|| SAMPLE PAGE & DOCUMENTATION MENU ITEMS ||-----------------------//
@@ -16,20 +18,11 @@ export const other = {
     children: [
         {
             id: 'sample-page',
-            title: 'Sample Page',
+            title: 'Outages',
             type: 'item',
             url: '/sample-page',
-            icon: icons['IconBrandChrome'],
+            icon: icons.OutageIcon,
             breadcrumbs: false
         },
-        {
-            id: 'documentation',
-            title: 'Documentation',
-            type: 'item',
-            url: 'https://docs.appseed.us/products/react/flask-berry-dashboard',
-            icon: icons['IconHelp'],
-            external: true,
-            target: true
-        }
     ]
 };

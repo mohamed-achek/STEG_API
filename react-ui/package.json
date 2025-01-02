@@ -18,6 +18,7 @@
         "@mui/icons-material": "^6.3.0",
         "@mui/material": "^6.3.0",
         "@mui/utils": "^6.3.0",
+        "@react-google-maps/api": "^2.20.5",
         "@tabler/icons": "^1.39.1",
         "@testing-library/jest-dom": "^5.11.10",
         "@testing-library/react": "^11.2.6",

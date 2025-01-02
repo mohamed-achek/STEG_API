@@ -14,6 +14,7 @@ def add_outage():
 
         outage_type = data.get('outage_type')
         start_time = data.get('start_time')
+        heatmapdata = data.get('heatmapdata')
 
         # Validate required fields
         if outage_type is None or start_time is None:
@@ -24,7 +25,8 @@ def add_outage():
             start_time=datetime.fromisoformat(start_time),
             end_time=datetime.fromisoformat(data['end_time']) if data.get('end_time') else None,
             description=data.get('description', ''),
-            status=data.get('status', 'Ongoing')
+            status=data.get('status', 'Ongoing'),
+            heatmapdata=heatmapdata
         )
         db.session.add(new_outage)
         db.session.commit()
@@ -44,10 +46,29 @@ def get_outages():
                 'start_time': outage.start_time.isoformat(),
                 'end_time': outage.end_time.isoformat() if outage.end_time else None,
                 'description': outage.description,
-                'status': outage.status
+                'status': outage.status,
+                'heatmapdata': outage.heatmapdata
             }
             for outage in outages
         ]
         return jsonify(outages_list), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+# Endpoint to get heatmap data
+@outages_bp.route('/outages/heatmap', methods=['GET'])
+def get_heatmap_data():
+    try:
+        outages = Outage.query.all()
+        heatmap_data = [
+            {
+                'latitude': outage.heatmapdata['latitude'],
+                'longitude': outage.heatmapdata['longitude'],
+                'weight': outage.heatmapdata.get('weight', 1)
+            }
+            for outage in outages
+            if outage.heatmapdata and 'latitude' in outage.heatmapdata and 'longitude' in outage.heatmapdata
+        ]
+        return jsonify(heatmap_data), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400

@@ -80,7 +80,7 @@ export const useFetchConsumptionData = () => {
     useEffect(() => {
         const fetchConsumptionData = async () => {
             try {
-                const response = await fetch('/api/consumption');
+                const response = await fetch('http://127.0.0.1:5000/api/consumption');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }

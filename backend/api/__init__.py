@@ -29,6 +29,7 @@ app.register_blueprint(consumption_bp, url_prefix='/api')
 app.register_blueprint(outages_bp, url_prefix='/api')
 app.register_blueprint(payment_bp, url_prefix='/api')
 
+
 # Setup database
 @app.before_request
 def initialize_database():
@@ -67,7 +68,3 @@ def after_request(response):
             except json.JSONDecodeError:
                 pass  # Handle the case where response data is not JSON
     return response
-
-@app.route('/api/test', methods=['GET'])
-def test_endpoint():
-    return jsonify({"message": "Test endpoint is working"}), 200
