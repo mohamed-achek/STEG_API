@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // material-ui
 import { makeStyles } from '@material-ui/styles';
@@ -57,14 +57,47 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
+// Hook to fetch consumption data
+const useFetchConsumptionData = (userId) => {
+    const [consumptionData, setConsumptionData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchConsumptionData = async () => {
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/api/consumption?user_id=${userId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('Fetched consumption data:', data); // Log the fetched data
+                setConsumptionData(data);
+            } catch (error) {
+                console.error('Error fetching consumption data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchConsumptionData();
+    }, [userId]);
+
+    return { consumptionData, isLoading };
+};
+
 //-----------------------|| DASHBOARD - Monthly CONSUMPTION LIGHT CARD ||-----------------------//
 
 const MonthlyConsumptionLightCard = ({ isLoading }) => {
     const classes = useStyles();
+    const userId = 1; // User ID to fetch data for
+    const { consumptionData, isLoading: dataLoading } = useFetchConsumptionData(userId);
+
+    // Calculate total consumption
+    const totalConsumption = consumptionData.reduce((total, item) => total + parseFloat(item.consumption), 0).toFixed(2);
 
     return (
         <React.Fragment>
-            {isLoading ? (
+            {isLoading || dataLoading ? (
                 <MonthlyConsumptionCard />
             ) : (
                 <MainCard className={classes.card} contentClass={classes.content}>
@@ -81,7 +114,7 @@ const MonthlyConsumptionLightCard = ({ isLoading }) => {
                                     mb: 0.45
                                 }}
                                 className={classes.padding}
-                                primary={<Typography variant="h4">262.5 kWh</Typography>}
+                                primary={<Typography variant="h4">{totalConsumption} kWh</Typography>}
                                 secondary={
                                     <Typography variant="subtitle2" className={classes.secondary}>
                                         Monthly Consumption

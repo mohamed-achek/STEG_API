@@ -5,7 +5,7 @@ from models import db, ConsumptionData
 consumption_bp = Blueprint('consumption', __name__)
 
 # Endpoint to add consumption data
-@consumption_bp.route('/api/consumption/add', methods=['POST'])
+@consumption_bp.route('/consumption/add', methods=['POST'])
 def add_consumption():
     try:
         data = request.get_json()
@@ -24,7 +24,7 @@ def add_consumption():
         return jsonify({"error": str(e)}), 400
 
 # Endpoint to get all consumption data
-@consumption_bp.route('/api/consumption', methods=['GET'])
+@consumption_bp.route('/consumption', methods=['GET'])
 def get_consumption():
     try:
         consumption_data = ConsumptionData.query.all()

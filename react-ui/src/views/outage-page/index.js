@@ -8,6 +8,9 @@ import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, Tab
 import MainCard from '../../ui-component/cards/MainCard';
 import { gridSpacing } from '../../store/constant'; // Import gridSpacing
 
+// Define the libraries array outside of the component
+const libraries = ['visualization'];
+
 // Hook to fetch outage data
 const useFetchOutageData = () => {
     const [outageData, setOutageData] = useState([]);
@@ -103,7 +106,7 @@ const OutagePage = () => {
                     <Grid item xs={12}>
                         <LoadScript
                             googleMapsApiKey="" // Add your Google Maps API key here
-                            libraries={['visualization']}
+                            libraries={libraries}
                             onLoad={handleLoad}
                         >
                             <GoogleMap
@@ -111,7 +114,13 @@ const OutagePage = () => {
                                 center={{ lat: 36.8065, lng: 10.1815 }} // Center the map to a default location
                                 zoom={10}
                             >
-                                <HeatmapLayer data={heatmapPoints} />
+                                <HeatmapLayer 
+                                    data={heatmapPoints} 
+                                    options={{
+                                        radius: 30,
+                                        opacity: 0.7
+                                    }}
+                                />
                             </GoogleMap>
                         </LoadScript>
                     </Grid>

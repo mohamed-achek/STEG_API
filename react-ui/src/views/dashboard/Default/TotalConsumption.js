@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // material-ui
 import { Grid, MenuItem, TextField, Typography, useTheme } from '@material-ui/core';
@@ -13,30 +13,59 @@ import SkeletonTotalGrowthBarChart from '../../../ui-component/cards/Skeleton/To
 import MainCard from '../../../ui-component/cards/MainCard';
 import { gridSpacing } from '../../../store/constant';
 
-// chart data
-import chartData, { useFetchConsumptionData } from './chart-data/total-consumption-bar-chart';
+// Hook to fetch consumption data
+const useFetchConsumptionData = (userId) => {
+    const [consumptionData, setConsumptionData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-const status = [
-    {
-        value: 'today',
-        label: 'Today'
-    },
-    {
-        value: 'month',
-        label: 'This Month'
-    },
-    {
-        value: 'year',
-        label: 'This Year'
-    }
-];
+    useEffect(() => {
+        const fetchConsumptionData = async () => {
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/api/consumption?user_id=${userId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('Fetched consumption data:', data); // Log the fetched data
+                setConsumptionData(data);
+            } catch (error) {
+                console.error('Error fetching consumption data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchConsumptionData();
+    }, [userId]);
+
+    return { consumptionData, isLoading };
+};
+
+// Function to group consumption data by month
+const groupConsumptionByMonth = (data) => {
+    const groupedData = {};
+
+    data.forEach(item => {
+        const date = new Date(item.date);
+        const month = date.toLocaleString('default', { month: 'short' });
+        if (!groupedData[month]) {
+            groupedData[month] = 0;
+        }
+        groupedData[month] += parseFloat(item.consumption);
+    });
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const seriesData = months.map(month => groupedData[month] || 0);
+
+    return seriesData;
+};
 
 //-----------------------|| DASHBOARD DEFAULT - TOTAL GROWTH BAR CHART ||-----------------------//
 
 const TotalGrowthBarChart = () => {
-    const [value, setValue] = React.useState('today');
+    const userId = 1; // User ID to fetch data for
+    const { consumptionData, isLoading } = useFetchConsumptionData(userId);
     const theme = useTheme();
-    const { consumptionData, isLoading } = useFetchConsumptionData();
 
     const primary = theme.palette.text.primary;
     const grey200 = theme.palette.grey[200];
@@ -47,97 +76,62 @@ const TotalGrowthBarChart = () => {
     const secondaryLight = theme.palette.secondary.light;
     const grey500 = theme.palette.grey[500];
 
-    React.useEffect(() => {
-        const newChartData = {
-            ...chartData.options,
-            colors: [primary200, primaryDark, secondaryMain, secondaryLight],
-            xaxis: {
-                labels: {
-                    style: {
-                        colors: [primary, primary, primary, primary, primary, primary, primary, primary, primary, primary, primary, primary]
-                    }
-                }
-            },
-            yaxis: {
-                labels: {
-                    style: {
-                        colors: [primary]
-                    }
-                }
-            },
-            grid: {
-                borderColor: grey200
-            },
-            tooltip: {
-                theme: 'light'
-            },
-            legend: {
-                labels: {
-                    colors: grey500
+    const seriesData = groupConsumptionByMonth(consumptionData);
+
+    const chartOptions = {
+        chart: {
+            id: 'monthly-consumption-chart',
+            type: 'bar',
+            toolbar: {
+                show: true
+            }
+        },
+        colors: [primary200, primaryDark, secondaryMain, secondaryLight],
+        xaxis: {
+            categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            labels: {
+                style: {
+                    colors: [primary, primary, primary, primary, primary, primary, primary, primary, primary, primary, primary, primary]
                 }
             }
-        };
-
-        // Update the series data with the fetched consumption data
-        const seriesData = consumptionData.map(item => parseFloat(item.consumption));
-        console.log('Series data for chart:', seriesData); // Log the series data
-        newChartData.series = [
-            {
-                name: 'Consumption',
-                data: seriesData
+        },
+        yaxis: {
+            labels: {
+                style: {
+                    colors: [primary]
+                }
             }
-        ];
-
-        // do not load chart when loading
-        if (!isLoading) {
-            ApexCharts.exec(`bar-chart`, 'updateOptions', newChartData);
+        },
+        grid: {
+            borderColor: grey200
+        },
+        tooltip: {
+            theme: 'light'
+        },
+        legend: {
+            labels: {
+                colors: grey500
+            }
         }
-    }, [primary200, primaryDark, secondaryMain, secondaryLight, primary, grey200, isLoading, grey500, consumptionData]);
+    };
 
     return (
-        <React.Fragment>
+        <MainCard title="Monthly Consumption in kWh">
             {isLoading ? (
                 <SkeletonTotalGrowthBarChart />
             ) : (
-                <MainCard>
-                    <Grid container spacing={gridSpacing}>
-                        <Grid item xs={12}>
-                            <Grid container alignItems="center" justifyContent="space-between">
-                                <Grid item>
-                                    <Grid container direction="column" spacing={1}>
-                                        <Grid item>
-                                            <Typography variant="subtitle2">Total Consumption</Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Typography variant="h3">
-                                                kWh {consumptionData.reduce((total, item) => total + parseFloat(item.consumption), 0).toFixed(2)}
-                                            </Typography>
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-                                <Grid item>
-                                    <TextField
-                                        id="standard-select-currency"
-                                        select
-                                        value={value}
-                                        onChange={(e) => setValue(e.target.value)}
-                                    >
-                                        {status.map((option) => (
-                                            <MenuItem key={option.value} value={option.value}>
-                                                {option.label}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Chart {...chartData} />
-                        </Grid>
+                <Grid container spacing={gridSpacing}>
+                    <Grid item xs={12}>
+                        <Chart
+                            options={chartOptions}
+                            series={[{ name: 'Consumption', data: seriesData }]}
+                            type="bar"
+                            height={350}
+                        />
                     </Grid>
-                </MainCard>
+                </Grid>
             )}
-        </React.Fragment>
+        </MainCard>
     );
 };
 

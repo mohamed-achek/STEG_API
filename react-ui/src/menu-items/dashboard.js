@@ -1,10 +1,11 @@
 // assets
-import { IconDashboard, IconDeviceAnalytics } from '@tabler/icons';
+import { IconDeviceAnalytics } from '@tabler/icons';
+import DashboardIcon from './../assets/images/icons/dashboard.png'; // Import the new dashboard icon
 
 // constant
 const icons = {
-    IconDashboard: IconDashboard,
-    IconDeviceAnalytics
+    IconDeviceAnalytics,
+    DashboardIcon: () => <img src={DashboardIcon} alt="Dashboard Icon" style={{ width: '24px', height: '24px' }} /> // Use the new dashboard icon
 };
 
 //-----------------------|| DASHBOARD MENU ITEMS ||-----------------------//
@@ -19,7 +20,7 @@ export const dashboard = {
             title: 'Dashboard',
             type: 'item',
             url: '/dashboard/default',
-            icon: icons['IconDashboard'],
+            icon: icons.DashboardIcon,
             breadcrumbs: false
         }
     ]
