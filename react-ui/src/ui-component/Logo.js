@@ -6,7 +6,7 @@ import logo from './../assets/images/logo.png';
 
 const Logo = () => {
     return (
-        <img src={logo} alt="STEG Logo" width="100" />
+        <img src={logo} alt="STEG Logo" width="180" />
     );
 };
 

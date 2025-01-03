@@ -5,6 +5,7 @@ from flask_cors import CORS
 from .auth import rest_api
 from models import db
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
 from api.billing import billing_bp
 from api.consumption import consumption_bp
 from api.outages import outages_bp
@@ -20,6 +21,8 @@ db.init_app(app)
 migrate = Migrate(app, db)
 rest_api.init_app(app)
 CORS(app)
+
+jwt = JWTManager(app)  # Initialize JWTManager
 
 app.register_blueprint(billing_bp, url_prefix='/api')
 app.register_blueprint(consumption_bp, url_prefix='/api')

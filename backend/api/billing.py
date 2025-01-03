@@ -44,7 +44,7 @@ def add_bill():
 
 
 # Endpoint to get all bills
-@billing_bp.route('/api/bills', methods=['GET'])
+@billing_bp.route('/bills', methods=['GET'])
 def get_bills():
     bills = Bill.query.all()
     bills_list = [
