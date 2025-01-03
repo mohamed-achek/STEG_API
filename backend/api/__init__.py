@@ -1,8 +1,3 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2019 - present AppSeed.us
-"""
-
 import os, json
 
 from flask import Flask, jsonify
@@ -14,6 +9,8 @@ from api.billing import billing_bp
 from api.consumption import consumption_bp
 from api.outages import outages_bp
 from api.payment import payment_bp
+from .model_loader import load_model_and_scaler
+
 
 app = Flask(__name__)
 
@@ -29,6 +26,7 @@ app.register_blueprint(consumption_bp, url_prefix='/api')
 app.register_blueprint(outages_bp, url_prefix='/api')
 app.register_blueprint(payment_bp, url_prefix='/api')
 
+model, scaler = load_model_and_scaler()
 
 # Setup database
 @app.before_request

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 // material-ui
-import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid } from '@material-ui/core';
+import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid, TextField, Button } from '@material-ui/core';
 
 // project imports
 import MainCard from '../../ui-component/cards/MainCard';
@@ -39,6 +39,32 @@ const useFetchConsumptionData = () => {
 
 const ConsumptionPage = () => {
     const { consumptionData, isLoading } = useFetchConsumptionData();
+    const [inputValues, setInputValues] = useState({ month1: '', month2: '', month3: '' });
+    const [prediction, setPrediction] = useState(null);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setInputValues({ ...inputValues, [name]: value });
+    };
+
+    const handlePredict = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ input_data: [inputValues.month1, inputValues.month2, inputValues.month3] })
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            setPrediction(data.prediction[0][0]);
+        } catch (error) {
+            console.error('Error predicting consumption:', error);
+        }
+    };
 
     return (
         <MainCard title="Consumption">
@@ -70,6 +96,40 @@ const ConsumptionPage = () => {
                             </Table>
                         </TableContainer>
                     </Grid>
+                    <Grid item xs={12}>
+                        <Typography variant="h6">Enter Consumption Values for the Last 3 Months:</Typography>
+                        <TextField
+                            label="Month 1"
+                            name="month1"
+                            value={inputValues.month1}
+                            onChange={handleInputChange}
+                            style={{ marginRight: '10px' }}
+                        />
+                        <TextField
+                            label="Month 2"
+                            name="month2"
+                            value={inputValues.month2}
+                            onChange={handleInputChange}
+                            style={{ marginRight: '10px' }}
+                        />
+                        <TextField
+                            label="Month 3"
+                            name="month3"
+                            value={inputValues.month3}
+                            onChange={handleInputChange}
+                            style={{ marginRight: '10px' }}
+                        />
+                        <Button variant="contained" color="primary" onClick={handlePredict}>
+                            Predict Next Month's Consumption
+                        </Button>
+                    </Grid>
+                    {prediction !== null && (
+                        <Grid item xs={12}>
+                            <Typography variant="h4" style={{ marginTop: '20px' }}>
+                                Predicted Consumption for Next Month: <strong>{prediction.toFixed(2)} kWh</strong>
+                            </Typography>
+                        </Grid>
+                    )}
                 </Grid>
             )}
         </MainCard>

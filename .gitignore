@@ -9,3 +9,5 @@ env/
 env__/
 .vscode/symbols.json
 app/db.sqlite3
+backend/MLmodel/MLvenv/
+backend/venv/
