@@ -1,5 +1,3 @@
-
-
 from datetime import datetime, timezone, timedelta
 
 from functools import wraps
@@ -48,28 +46,43 @@ def token_required(f):
 
         if "authorization" in request.headers:
             token = request.headers["authorization"]
+            if token.startswith("Bearer "):
+                token = token[len("Bearer "):]
 
         if not token:
+            print("Token is missing")
             return {"success": False, "msg": "Valid JWT token is missing"}, 400
 
         try:
+            print(f"Decoding token: {token}")
             data = jwt.decode(token, BaseConfig.SECRET_KEY, algorithms=["HS256"])
+            print(f"Token decoded: {data}")
             current_user = User.get_by_email(data["email"])
 
             if not current_user:
+                print("User does not exist")
                 return {"success": False,
                         "msg": "Sorry. Wrong auth token. This user does not exist."}, 400
 
             token_expired = db.session.query(JWTTokenBlocklist.id).filter_by(jwt_token=token).scalar()
 
             if token_expired is not None:
+                print("Token revoked")
                 return {"success": False, "msg": "Token revoked."}, 400
 
-            if not current_user.check_jwt_auth_active():
+            if not hasattr(current_user, 'jwt_auth_active') or not current_user.check_jwt_auth_active():
+                print("Token expired")
                 return {"success": False, "msg": "Token expired."}, 400
 
-        except:
+        except jwt.ExpiredSignatureError:
+            print("Token has expired")
+            return {"success": False, "msg": "Token has expired"}, 400
+        except jwt.InvalidTokenError:
+            print("Token is invalid")
             return {"success": False, "msg": "Token is invalid"}, 400
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
+            return {"success": False, "msg": f"An error occurred: {str(e)}"}, 400
 
         return f(current_user, *args, **kwargs)
 
@@ -135,7 +148,7 @@ class Login(Resource):
             return {"success": False,
                     "msg": "Wrong credentials."}, 400
 
-        # create access token uwing JWT
+        # create access token using JWT
         token = jwt.encode({'email': _email, 'exp': datetime.utcnow() + timedelta(minutes=30)}, BaseConfig.SECRET_KEY)
 
         user_exists.set_jwt_auth_active(True)
@@ -175,65 +188,29 @@ class EditUser(Resource):
 @rest_api.route('/api/users/logout')
 class LogoutUser(Resource):
     """
-       Logs out User using 'logout_model' input
+    Logs out User using 'logout_model' input
     """
 
     @token_required
     def post(self, current_user):
+        try:
+            # Extract the JWT token from the Authorization header
+            auth_header = request.headers.get("authorization")
+            if not auth_header or not auth_header.startswith("Bearer "):
+                return {"error": "Authorization header is missing or malformed"}, 400
 
-        _jwt_token = request.headers["authorization"]
+            _jwt_token = auth_header.split(" ")[1]
 
-        jwt_block = JWTTokenBlocklist(jwt_token=_jwt_token, created_at=datetime.now(timezone.utc))
-        jwt_block.save()
+            # Add the token to the blocklist
+            jwt_block = JWTTokenBlocklist(jwt_token=_jwt_token, created_at=datetime.now(timezone.utc))
+            jwt_block.save()
 
-        self.set_jwt_auth_active(False)
-        self.save()
+            # Deactivate JWT authentication for the user
+            current_user.set_jwt_auth_active(False)
+            current_user.save()
 
-        return {"success": True}, 200
+            return {"success": True}, 200
 
+        except Exception as e:
+            return {"error": str(e)}, 500
 
-@rest_api.route('/api/sessions/oauth/github/')
-class GitHubLogin(Resource):
-    def get(self):
-        code = request.args.get('code')
-        client_id = BaseConfig.GITHUB_CLIENT_ID
-        client_secret = BaseConfig.GITHUB_CLIENT_SECRET
-        root_url = 'https://github.com/login/oauth/access_token'
-
-        params = { 'client_id': client_id, 'client_secret': client_secret, 'code': code }
-
-        data = requests.post(root_url, params=params, headers={
-            'Content-Type': 'application/x-www-form-urlencoded',
-        })
-
-        response = data._content.decode('utf-8')
-        access_token = response.split('&')[0].split('=')[1]
-
-        user_data = requests.get('https://api.github.com/user', headers={
-            "Authorization": "Bearer " + access_token
-        }).json()
-        
-        user_exists = User.get_by_username(user_data['login'])
-        if user_exists:
-            user = user_exists
-        else:
-            try:
-                user = User(username=user_data['login'], email=user_data['email'])
-                user.save()
-            except:
-                user = User(username=user_data['login'])
-                user.save()
-        
-        user_json = user.toJSON()
-
-        token = jwt.encode({"username": user_json['username'], 'exp': datetime.utcnow() + timedelta(minutes=30)}, BaseConfig.SECRET_KEY)
-        user.set_jwt_auth_active(True)
-        user.save()
-
-        return {"success": True,
-                "user": {
-                    "_id": user_json['_id'],
-                    "email": user_json['email'],
-                    "username": user_json['username'],
-                    "token": token,
-                }}, 200

@@ -109,6 +109,17 @@ class Outage(db.Model):
     description = db.Column(db.Text)
     status = db.Column(db.String(50), default='Ongoing')
     heatmapdata = db.Column(db.JSON, nullable=True)  # Add heatmapdata column
+    region = db.Column(db.String(100), nullable=False, default='Unknown')  # Add region column with default value
+
+class ReportedOutage(db.Model):
+    __tablename__ = 'reported_outages'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    outage_type = db.Column(db.String(100), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    description = db.Column(db.Text)
+    status = db.Column(db.String(50), default='Ongoing')
+    region = db.Column(db.String(100), nullable=False)
 
 class JWTTokenBlocklist(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { GoogleMap, HeatmapLayer, LoadScript } from '@react-google-maps/api';
 
 // material-ui
-import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid } from '@material-ui/core';
+import { Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid, TextField, Button } from '@material-ui/core';
 
 // project imports
 import MainCard from '../../ui-component/cards/MainCard';
@@ -60,6 +60,13 @@ const useFetchOutageData = () => {
 const OutagePage = () => {
     const { outageData, heatmapData, isLoading } = useFetchOutageData();
     const [heatmapPoints, setHeatmapPoints] = useState([]);
+    const [formData, setFormData] = useState({
+        outage_type: '',
+        start_time: '',
+        description: '',
+        status: 'Ongoing',
+        region: ''
+    });
 
     const handleLoad = () => {
         const points = heatmapData.map(data => ({
@@ -67,6 +74,33 @@ const OutagePage = () => {
             weight: data.weight
         }));
         setHeatmapPoints(points);
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/outages/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log('Outage reported:', data);
+            alert('✅ Outage reported successfully ! \n\nThank you for reporting the issue. \nOur team has received your report and will investigate the issue promptly. \nYou will be notified as soon as we have updates regarding this outage. \n\n📞 For urgent inquiries, contact our support team at 123-456-789. \n\nWe appreciate your help in improving our service!');
+            // Optionally, refresh the outage data
+        } catch (error) {
+            console.error('Error reporting outage:', error);
+        }
     };
 
     return (
@@ -82,6 +116,7 @@ const OutagePage = () => {
                                     <TableRow>
                                         <TableCell>ID</TableCell>
                                         <TableCell>Outage Type</TableCell>
+                                        <TableCell>Region</TableCell> {/* Add region column header */}
                                         <TableCell>Start Time</TableCell>
                                         <TableCell>End Time</TableCell>
                                         <TableCell>Description</TableCell>
@@ -93,6 +128,7 @@ const OutagePage = () => {
                                         <TableRow key={outage.id}>
                                             <TableCell>{outage.id}</TableCell>
                                             <TableCell>{outage.outage_type}</TableCell>
+                                            <TableCell>{outage.region}</TableCell> {/* Add region data */}
                                             <TableCell>{outage.start_time}</TableCell>
                                             <TableCell>{outage.end_time || 'N/A'}</TableCell>
                                             <TableCell>{outage.description}</TableCell>
@@ -104,6 +140,9 @@ const OutagePage = () => {
                         </TableContainer>
                     </Grid>
                     <Grid item xs={12}>
+                        <Typography variant="h4" gutterBottom>
+                            Current Outages
+                        </Typography>
                         <LoadScript
                             googleMapsApiKey="" // Add your Google Maps API key here
                             libraries={libraries}
@@ -123,6 +162,63 @@ const OutagePage = () => {
                                 />
                             </GoogleMap>
                         </LoadScript>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Typography variant="h4" gutterBottom>
+                            Report an Outage
+                        </Typography>
+                        <form onSubmit={handleSubmit}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Outage Type"
+                                        name="outage_type"
+                                        value={formData.outage_type}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Region"
+                                        name="region"
+                                        value={formData.region}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        fullWidth
+                                        label="Start Time"
+                                        name="start_time"
+                                        type="datetime-local"
+                                        value={formData.start_time}
+                                        onChange={handleChange}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        required
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <TextField
+                                        fullWidth
+                                        label="Description"
+                                        name="description"
+                                        value={formData.description}
+                                        onChange={handleChange}
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Button type="submit" variant="contained" color="primary">
+                                        Report Outage
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </form>
                     </Grid>
                 </Grid>
             )}
