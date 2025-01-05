@@ -1,37 +1,25 @@
-import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
-
-// material-ui
+import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
 import { Avatar, Grid, Typography } from '@material-ui/core';
-
-// project imports
 import MainCard from '../../../ui-component/cards/MainCard';
-import SkeletonTotalOrderCard from '../../../ui-component/cards/Skeleton/EarningCard';
+import SkeletonEarningCard from '../../../ui-component/cards/Skeleton/EarningCard';
+import Co2Icon from '@mui/icons-material/Co2';
 
-// assets
-import EcoIcon from '@mui/icons-material/EnergySavingsLeaf'; 
-import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
-// style constant
 const useStyles = makeStyles((theme) => ({
     card: {
-        backgroundColor: theme.palette.primary.dark,
+        background: 'linear-gradient(135deg, #4caf50 30%, #388e3c 90%)', // Gradient background for carbon footprint
         color: '#fff',
         overflow: 'hidden',
         position: 'relative',
-        '&>div': {
-            position: 'relative',
-            zIndex: 5
-        },
         '&:after': {
             content: '""',
             position: 'absolute',
             width: '210px',
             height: '210px',
-            background: theme.palette.primary[800],
+            background: 'rgba(255, 255, 255, 0.1)',
             borderRadius: '50%',
-            zIndex: 1,
             top: '-85px',
             right: '-95px',
             [theme.breakpoints.down('xs')]: {
@@ -42,10 +30,9 @@ const useStyles = makeStyles((theme) => ({
         '&:before': {
             content: '""',
             position: 'absolute',
-            zIndex: 1,
             width: '210px',
             height: '210px',
-            background: theme.palette.primary[800],
+            background: 'rgba(255, 255, 255, 0.1)',
             borderRadius: '50%',
             top: '-125px',
             right: '-15px',
@@ -62,142 +49,137 @@ const useStyles = makeStyles((theme) => ({
     avatar: {
         ...theme.typography.commonAvatar,
         ...theme.typography.largeAvatar,
-        backgroundColor: theme.palette.primary[800],
-        color: '#fff',
+        backgroundColor: '#388e3c', // Darker green
         marginTop: '8px'
+    },
+    avatarRight: {
+        ...theme.typography.commonAvatar,
+        ...theme.typography.mediumAvatar,
+        backgroundColor: '#4caf50', // Green color
+        color: '#fff',
+        zIndex: 1
     },
     cardHeading: {
         fontSize: '2.125rem',
         fontWeight: 500,
         marginRight: '8px',
-        marginTop: '14px',
+        marginTop: '8px', // Lift text up
         marginBottom: '6px'
     },
     subHeading: {
         fontSize: '1rem',
         fontWeight: 500,
-        color: theme.palette.primary[200]
+        color: '#fff'
     },
     avatarCircle: {
-        ...theme.typography.smallAvatar,
         cursor: 'pointer',
-        backgroundColor: theme.palette.primary[200],
-        color: theme.palette.primary.dark
+        ...theme.typography.smallAvatar,
+        backgroundColor: '#fff',
+        color: '#4caf50' // Green color
     },
     circleIcon: {
         transform: 'rotate3d(1, 1, 1, 45deg)'
+    },
+    menuItem: {
+        marginRight: '14px',
+        fontSize: '1.25rem'
     }
 }));
 
-const CarbonFootprintCard = ({ isLoading }) => {
+const CarbonFootprint = ({ userId, isLoading }) => {
     const classes = useStyles();
-    const [carbonFootprint, setCarbonFootprint] = useState(0);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [yearlyCO2, setYearlyCO2] = useState(0);
     const [treesSaved, setTreesSaved] = useState(0);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchConsumptionData = async () => {
             try {
-                console.log('Fetching consumption data...');
-                const response = await fetch('/api/consumption');
+                const response = await fetch(`http://127.0.0.1:5000/api/consumption?user_id=${userId}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                if (!Array.isArray(data) || data.length === 0) {
-                    throw new Error('No consumption data found or invalid format');
-                }
                 console.log('Fetched consumption data:', data); // Log the fetched data
-                calculateEnvironmentalImpact(data);
+
+                if (!Array.isArray(data)) {
+                    throw new Error('Data is not an array');
+                }
+
+                const currentYear = new Date().getFullYear();
+                const previousYear = currentYear - 1;
+                const yearBeforeLast = currentYear - 2;
+
+                const filteredDataPreviousYear = filterDataByYear(data, previousYear);
+                const filteredDataYearBeforeLast = filterDataByYear(data, yearBeforeLast);
+
+                console.log('Filtered data for previous year:', filteredDataPreviousYear);
+                console.log('Filtered data for year before last:', filteredDataYearBeforeLast);
+
+                const yearlyCO2PreviousYear = calculateYearlyCO2(filteredDataPreviousYear);
+                const yearlyCO2YearBeforeLast = calculateYearlyCO2(filteredDataYearBeforeLast);
+
+                setYearlyCO2(yearlyCO2PreviousYear);
+
+                const co2Reduction = yearlyCO2YearBeforeLast - yearlyCO2PreviousYear;
+                const treesEquivalent = calculateTreesSaved(co2Reduction);
+                setTreesSaved(treesEquivalent);
             } catch (error) {
                 console.error('Error fetching consumption data:', error);
-                setError('Failed to fetch consumption data. Please try again later.');
+                setError('Failed to fetch data. Please try again later.');
             }
         };
 
         fetchConsumptionData();
-    }, []);
+    }, [userId]);
 
-    const calculateEnvironmentalImpact = (data) => {
-        const yearlyConsumption = {};
-
-        data.forEach(item => {
-            if (!item.date || !item.consumption) {
-                console.error('Invalid data format:', item);
-                return;
-            }
-
-            const date = new Date(item.date);
-            if (isNaN(date.getTime())) {
-                console.error('Invalid date format:', item.date);
-                return;
-            }
-
-            const year = date.getFullYear();
-
-            // Aggregate yearly consumption
-            if (!yearlyConsumption[year]) {
-                yearlyConsumption[year] = 0;
-            }
-            yearlyConsumption[year] += item.consumption;
-        });
-
-        const totalYearlyConsumption = Object.values(yearlyConsumption).reduce((sum, value) => sum + value, 0);
-
-        console.log('Total yearly consumption:', totalYearlyConsumption); // Log total yearly consumption
-
-        const carbonFootprintYearly = totalYearlyConsumption * 0.92; // Example conversion factor
-        const treesSavedYearly = totalYearlyConsumption * 0.06; // Example conversion factor
-
-        console.log('Carbon footprint (yearly):', carbonFootprintYearly); // Log carbon footprint (yearly)
-        console.log('Trees saved (yearly):', treesSavedYearly); // Log trees saved (yearly)
-
-        setCarbonFootprint(carbonFootprintYearly);
-        setTreesSaved(treesSavedYearly);
+    const filterDataByYear = (data, year) => {
+        return data.filter(record => new Date(record.date).getFullYear() === year);
     };
+
+    const calculateYearlyCO2 = (data) => {
+        const CO2_PER_KWH = 0.233;
+        const yearlyConsumption = data.reduce((total, record) => total + (record.consumption || 0), 0);
+        return yearlyConsumption * CO2_PER_KWH;
+    };
+
+    const calculateTreesSaved = (co2Reduction) => {
+        const CO2_PER_TREE = 21.77; // Average kg of CO2 absorbed by a tree per year
+        return co2Reduction / CO2_PER_TREE;
+    };
+
 
     return (
         <React.Fragment>
-            {console.log('Rendering CarbonFootprintCard...')}
             {isLoading ? (
-                <SkeletonTotalOrderCard />
-            ) : error ? (
-                <Typography variant="body2" color="error">{error}</Typography>
+                <SkeletonEarningCard />
             ) : (
                 <MainCard border={false} className={classes.card} contentClass={classes.content}>
                     <Grid container direction="column">
                         <Grid item>
                             <Grid container justifyContent="space-between">
                                 <Grid item>
+                                    <Typography className={classes.cardHeading}>{yearlyCO2.toFixed(2)} kg</Typography>
+                                </Grid>
+                                <Grid item>
                                     <Avatar variant="rounded" className={classes.avatar}>
-                                        <EcoIcon fontSize="inherit" />
+                                        <Co2Icon fontSize="large" />
                                     </Avatar>
                                 </Grid>
                             </Grid>
                         </Grid>
-                        <Grid item sx={{ mb: 0.75 }}>
+                        <Grid item>
                             <Grid container alignItems="center">
-                                <Grid item xs={6}>
-                                    <Grid container alignItems="center">
-                                        <Grid item>
-                                            <Typography className={classes.cardHeading}>{carbonFootprint.toFixed(2)} kg CO2</Typography>
-                                        </Grid>
-                                        <Grid item>
-                                            <Avatar className={classes.avatarCircle}>
-                                                <ArrowDownwardIcon fontSize="inherit" className={classes.circleIcon} />
-                                            </Avatar>
-                                        </Grid>
-                                        <Grid item xs={12}>
-                                            <Typography className={classes.subHeading}>Carbon Footprint</Typography>
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-                                <Grid item xs={6}>
-                                    <Typography className={classes.cardHeading}>
-                                        {treesSaved.toFixed(2)} Trees Saved
-                                    </Typography>
+                                <Grid item>
                                 </Grid>
                             </Grid>
+                        </Grid>
+                        <Grid item sx={{ mb: 1.25 }}>
+                            <Typography className={classes.subHeading}>Yearly CO2 Impact</Typography>
+                        </Grid>
+                        <Grid item sx={{ mb: 1.25 }}>
+                            <Typography className={classes.subHeading}>Equivalent to saving {treesSaved.toFixed(2)} trees compared to last year</Typography>
                         </Grid>
                     </Grid>
                 </MainCard>
@@ -206,12 +188,9 @@ const CarbonFootprintCard = ({ isLoading }) => {
     );
 };
 
-CarbonFootprintCard.propTypes = {
+CarbonFootprint.propTypes = {
+    userId: PropTypes.number.isRequired,
     isLoading: PropTypes.bool
 };
 
-CarbonFootprintCard.defaultProps = {
-    isLoading: false
-};
-
-export default CarbonFootprintCard;
+export default CarbonFootprint;

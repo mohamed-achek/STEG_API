@@ -3,8 +3,6 @@ from datetime import date
 from models import db, ConsumptionData
 import numpy as np
 
-
-
 consumption_bp = Blueprint('consumption', __name__)
 
 # Endpoint to add consumption data
@@ -57,7 +55,6 @@ def get_consumption():
         return jsonify(consumption_list), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-    
 
 @consumption_bp.route('/predict', methods=['POST'])
 def predict():
