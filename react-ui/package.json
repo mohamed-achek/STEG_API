@@ -28,6 +28,8 @@
         "clsx": "^1.1.1",
         "formik": "^2.2.6",
         "framer-motion": "^4.1.13",
+        "jspdf": "^2.5.2",
+        "jspdf-autotable": "^3.8.4",
         "material-ui-popup-state": "^1.8.0",
         "react": "^17.0.2",
         "react-apexcharts": "^1.7.0",

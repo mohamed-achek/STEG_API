@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Grid, Card, CardContent, CardActions, Button } from '@material-ui/core';
+import { Typography, Grid } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles'; // Correct import for makeStyles
 import MainCard from '../../ui-component/cards/MainCard';
 import { gridSpacing } from '../../store/constant';
+import BillCard from './BillCard'; // Import BillCard component
 
 const useStyles = makeStyles((theme) => ({
     card: {
@@ -30,7 +31,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BillingPage = () => {
-    const classes = useStyles();
     const [bills, setBills] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -53,6 +53,36 @@ const BillingPage = () => {
         fetchBills();
     }, []);
 
+    const handlePay = (id) => {
+        // Implement the pay functionality
+        console.log(`Pay bill with ID: ${id}`);
+    };
+
+    const handleDownload = async (id) => {
+        // Implement the download functionality
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/api/bills/${id}/download`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bill_${id}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (error) {
+            console.error('Error downloading bill:', error);
+        }
+    };
+
+    const handleDelete = (id) => {
+        // Implement the delete functionality
+        console.log(`Delete bill with ID: ${id}`);
+    };
+
     return (
         <MainCard title="Billing">
             {isLoading ? (
@@ -62,24 +92,7 @@ const BillingPage = () => {
                     {bills && bills.length > 0 ? (
                         bills.map((bill) => (
                             <Grid item xs={12} sm={6} md={4} key={bill.id}>
-                                <Card className={classes.card}>
-                                    <CardContent className={classes.cardContent}>
-                                        <Typography variant="h6">Bill ID: {bill.id}</Typography>
-                                        <Typography variant="body2">User ID: {bill.user_id}</Typography>
-                                        <Typography variant="body2">Amount: ${bill.amount}</Typography>
-                                        <Typography variant="body2">Due Date: {bill.due_date}</Typography>
-                                        <Typography
-                                            variant="body2"
-                                            className={`${classes.paidStatus} ${bill.paid ? classes.paidYes : classes.paidNo}`}
-                                        >
-                                            Paid: {bill.paid ? 'Yes' : 'No'}
-                                        </Typography>
-                                        <Typography variant="body2">Payment Date: {bill.payment_date || 'N/A'}</Typography>
-                                    </CardContent>
-                                    <CardActions className={classes.cardActions}>
-                                        <Button size="small" color="primary">View Details</Button>
-                                    </CardActions>
-                                </Card>
+                                <BillCard bill={bill} onPay={handlePay} onDownload={handleDownload} onDelete={handleDelete} />
                             </Grid>
                         ))
                     ) : (
