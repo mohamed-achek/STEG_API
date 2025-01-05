@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // material-ui
 import { makeStyles } from '@material-ui/styles';
@@ -61,6 +61,25 @@ const PopularCard = ({ isLoading }) => {
     const classes = useStyles();
 
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [ongoingOutages, setOngoingOutages] = useState([]);
+
+    useEffect(() => {
+        const fetchOngoingOutages = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/outages');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                const ongoing = data.filter(outage => outage.status === 'Ongoing');
+                setOngoingOutages(ongoing);
+            } catch (error) {
+                console.error('Error fetching ongoing outages:', error);
+            }
+        };
+
+        fetchOngoingOutages();
+    }, []);
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -81,7 +100,7 @@ const PopularCard = ({ isLoading }) => {
                             <Grid item xs={12}>
                                 <Grid container alignContent="center" justifyContent="space-between">
                                     <Grid item>
-                                        <Typography variant="h4">Popular Stocks</Typography>
+                                        <Typography variant="h4">Ongoing Outages</Typography>
                                     </Grid>
                                     <Grid item>
                                         <MoreHorizOutlinedIcon
@@ -115,163 +134,25 @@ const PopularCard = ({ isLoading }) => {
                                 </Grid>
                             </Grid>
                             <Grid item xs={12} sx={{ pt: '16px !important' }}>
-                            
-                            </Grid>
-                            <Grid item xs={12}>
-                                <Grid container direction="column">
-                                    <Grid item>
-                                        <Grid container alignItems="center" justifyContent="space-between">
-                                            <Grid item>
-                                                <Typography variant="subtitle1" color="inherit">
-                                                    Bajaj Finery
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Grid container alignItems="center" justifyContent="space-between">
-                                                    <Grid item>
-                                                        <Typography variant="subtitle1" color="inherit">
-                                                            $1839.00
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Avatar variant="rounded" className={classes.avatarSuccess}>
-                                                            <KeyboardArrowUpOutlinedIcon fontSize="small" color="inherit" />
-                                                        </Avatar>
-                                                    </Grid>
+                                {ongoingOutages.map((outage) => (
+                                    <Grid container direction="column" key={outage.id}>
+                                        <Grid item>
+                                            <Grid container alignItems="center" justifyContent="space-between">
+                                                <Grid item>
+                                                    <Typography variant="subtitle1" color="inherit">
+                                                        {outage.region}
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid item>
+                                                    <Typography variant="subtitle2" color="inherit">
+                                                        {outage.description}
+                                                    </Typography>
                                                 </Grid>
                                             </Grid>
                                         </Grid>
+                                        <Divider className={classes.divider} />
                                     </Grid>
-                                    <Grid item>
-                                        <Typography variant="subtitle2" className={classes.successDark}>
-                                            10% Profit
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                                <Divider className={classes.divider} />
-                                <Grid container direction="column">
-                                    <Grid item>
-                                        <Grid container alignItems="center" justifyContent="space-between">
-                                            <Grid item>
-                                                <Typography variant="subtitle1" color="inherit">
-                                                    TTML
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Grid container alignItems="center" justifyContent="space-between">
-                                                    <Grid item>
-                                                        <Typography variant="subtitle1" color="inherit">
-                                                            $100.00
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Avatar variant="rounded" className={classes.avatarError}>
-                                                            <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
-                                                        </Avatar>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography variant="subtitle2" className={classes.errorDark}>
-                                            10% loss
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                                <Divider className={classes.divider} />
-                                <Grid container direction="column">
-                                    <Grid item>
-                                        <Grid container alignItems="center" justifyContent="space-between">
-                                            <Grid item>
-                                                <Typography variant="subtitle1" color="inherit">
-                                                    Reliance
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Grid container alignItems="center" justifyContent="space-between">
-                                                    <Grid item>
-                                                        <Typography variant="subtitle1" color="inherit">
-                                                            $200.00
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Avatar variant="rounded" className={classes.avatarSuccess}>
-                                                            <KeyboardArrowUpOutlinedIcon fontSize="small" color="inherit" />
-                                                        </Avatar>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography variant="subtitle2" className={classes.successDark}>
-                                            10% Profit
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                                <Divider className={classes.divider} />
-                                <Grid container direction="column">
-                                    <Grid item>
-                                        <Grid container alignItems="center" justifyContent="space-between">
-                                            <Grid item>
-                                                <Typography variant="subtitle1" color="inherit">
-                                                    TTML
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Grid container alignItems="center" justifyContent="space-between">
-                                                    <Grid item>
-                                                        <Typography variant="subtitle1" color="inherit">
-                                                            $189.00
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Avatar variant="rounded" className={classes.avatarError}>
-                                                            <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
-                                                        </Avatar>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography variant="subtitle2" className={classes.errorDark}>
-                                            10% loss
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                                <Divider className={classes.divider} />
-                                <Grid container direction="column">
-                                    <Grid item>
-                                        <Grid container alignItems="center" justifyContent="space-between">
-                                            <Grid item>
-                                                <Typography variant="subtitle1" color="inherit">
-                                                    Stolon
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Grid container alignItems="center" justifyContent="space-between">
-                                                    <Grid item>
-                                                        <Typography variant="subtitle1" color="inherit">
-                                                            $189.00
-                                                        </Typography>
-                                                    </Grid>
-                                                    <Grid item>
-                                                        <Avatar variant="rounded" className={classes.avatarError}>
-                                                            <KeyboardArrowDownOutlinedIcon fontSize="small" color="inherit" />
-                                                        </Avatar>
-                                                    </Grid>
-                                                </Grid>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                    <Grid item>
-                                        <Typography variant="subtitle2" className={classes.errorDark}>
-                                            10% loss
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
+                                ))}
                             </Grid>
                         </Grid>
                     </CardContent>

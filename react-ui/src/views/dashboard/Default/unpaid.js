@@ -1,13 +1,13 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // material-ui
 import { makeStyles } from '@material-ui/styles';
 import { Avatar, Grid, Menu, MenuItem, Typography } from '@material-ui/core';
 
 // project imports
-import MainCard from './../../../ui-component/cards/MainCard';
-import SkeletonEarningCard from './../../../ui-component/cards/Skeleton/EarningCard';
+import MainCard from '../../../ui-component/cards/MainCard';
+import SkeletonEarningCard from '../../../ui-component/cards/Skeleton/EarningCard';
 
 // assets
 import EarningIcon from './../../../assets/images/icons/earning.svg';
@@ -100,10 +100,30 @@ const useStyles = makeStyles((theme) => ({
 
 //===========================|| DASHBOARD DEFAULT - EARNING CARD ||===========================//
 
-const EarningCard = ({ isLoading }) => {
+const Unpaidbills = ({ isLoading }) => {
     const classes = useStyles();
 
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [totalUnpaid, setTotalUnpaid] = useState(0);
+
+    useEffect(() => {
+        const fetchUnpaidBills = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/bills');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                const unpaidBills = data.filter(bill => !bill.paid); // Filter by unpaid status
+                const total = unpaidBills.reduce((sum, bill) => sum + parseFloat(bill.amount), 0);
+                setTotalUnpaid(total);
+            } catch (error) {
+                console.error('Error fetching unpaid bills:', error);
+            }
+        };
+
+        fetchUnpaidBills();
+    }, []);
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -172,7 +192,7 @@ const EarningCard = ({ isLoading }) => {
                         <Grid item>
                             <Grid container alignItems="center">
                                 <Grid item>
-                                    <Typography className={classes.cardHeading}>$500.00</Typography>
+                                    <Typography className={classes.cardHeading}>${totalUnpaid.toFixed(2)}</Typography>
                                 </Grid>
                                 <Grid item>
                                     <Avatar className={classes.avatarCircle}>
@@ -182,7 +202,7 @@ const EarningCard = ({ isLoading }) => {
                             </Grid>
                         </Grid>
                         <Grid item sx={{ mb: 1.25 }}>
-                            <Typography className={classes.subHeading}>Total Earning</Typography>
+                            <Typography className={classes.subHeading}>Total Unpaid Bills</Typography>
                         </Grid>
                     </Grid>
                 </MainCard>
@@ -191,8 +211,8 @@ const EarningCard = ({ isLoading }) => {
     );
 };
 
-EarningCard.propTypes = {
+Unpaidbills.propTypes = {
     isLoading: PropTypes.bool
 };
 
-export default EarningCard;
+export default Unpaidbills;

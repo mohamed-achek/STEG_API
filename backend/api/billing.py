@@ -46,16 +46,19 @@ def add_bill():
 # Endpoint to get all bills
 @billing_bp.route('/bills', methods=['GET'])
 def get_bills():
-    bills = Bill.query.all()
-    bills_list = [
-        {
-            'id': bill.id,
-            'user_id': bill.user_id,
-            'amount': float(bill.amount),
-            'due_date': bill.due_date.isoformat(),
-            'paid': bill.paid,
-            'payment_date': bill.payment_date.isoformat() if bill.payment_date else None
-        }
-        for bill in bills
-    ]
-    return jsonify({"bills": bills_list}), 200
+    try:
+        bills = Bill.query.all()
+        bills_list = [
+            {
+                'id': bill.id,
+                'user_id': bill.user_id,
+                'amount': float(bill.amount),
+                'due_date': bill.due_date.isoformat(),
+                'paid': bill.paid,
+                'payment_date': bill.payment_date.isoformat() if bill.payment_date else None
+            }
+            for bill in bills
+        ]
+        return jsonify(bills_list), 200
+    except Exception as e:
+        return jsonify({"success": False, "msg": str(e)}), 500

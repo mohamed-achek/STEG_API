@@ -4,10 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { Grid } from '@material-ui/core';
 
 // project imports
-import EarningCard from './EarningCard';
+import EarningCard from './unpaid';
 import PopularCard from './PopularCard';
-import TotalOrderLineChartCard from './TotalOrderLineChartCard';
-import TotalIncomeLightCard from './TotalIncomeLightCard';
+import TotalOrderLineChartCard from './CarbonFootprint';
+import TotalIncomeLightCard from './TotalConsumptionLightCard';
 import TotalGrowthBarChart from './TotalConsumption';
 import { gridSpacing } from './../../../store/constant';
 

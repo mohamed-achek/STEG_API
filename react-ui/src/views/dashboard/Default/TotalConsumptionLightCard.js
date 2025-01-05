@@ -6,8 +6,8 @@ import { makeStyles } from '@material-ui/styles';
 import { Avatar, List, ListItem, ListItemAvatar, ListItemText, Typography } from '@material-ui/core';
 
 // project imports
-import MainCard from './../../../ui-component/cards/MainCard';
-import MonthlyConsumptionCard from './../../../ui-component/cards/Skeleton/TotalIncomeCard';
+import MainCard from '../../../ui-component/cards/MainCard';
+import MonthlyConsumptionCard from '../../../ui-component/cards/Skeleton/TotalIncomeCard';
 
 // assets
 import StorefrontTwoToneIcon from '@material-ui/icons/StorefrontTwoTone';

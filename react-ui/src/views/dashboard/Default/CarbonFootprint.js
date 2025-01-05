@@ -1,22 +1,16 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // material-ui
 import { makeStyles } from '@material-ui/styles';
-import { Avatar, Button, Grid, Typography } from '@material-ui/core';
-
-// third-party
-import Chart from 'react-apexcharts';
+import { Avatar, Grid, Typography } from '@material-ui/core';
 
 // project imports
-import MainCard from './../../../ui-component/cards/MainCard';
-import SkeletonTotalOrderCard from './../../../ui-component/cards/Skeleton/EarningCard';
-
-import ChartDataMonth from './chart-data/total-order-month-line-chart';
-import ChartDataYear from './chart-data/total-order-year-line-chart';
+import MainCard from '../../../ui-component/cards/MainCard';
+import SkeletonTotalOrderCard from '../../../ui-component/cards/Skeleton/EarningCard';
 
 // assets
-import LocalMallOutlinedIcon from '@material-ui/icons/LocalMallOutlined';
+import EcoIcon from '@mui/icons-material/EnergySavingsLeaf'; 
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 
 // style constant
@@ -95,20 +89,80 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-//-----------------------|| DASHBOARD - TOTAL ORDER LINE CHART CARD ||-----------------------//
-
-const TotalOrderLineChartCard = ({ isLoading }) => {
+const CarbonFootprintCard = ({ isLoading }) => {
     const classes = useStyles();
+    const [carbonFootprint, setCarbonFootprint] = useState(0);
+    const [treesSaved, setTreesSaved] = useState(0);
+    const [error, setError] = useState(null);
 
-    const [timeValue, setTimeValue] = React.useState(false);
-    const handleChangeTime = (event, newValue) => {
-        setTimeValue(newValue);
+    useEffect(() => {
+        const fetchConsumptionData = async () => {
+            try {
+                console.log('Fetching consumption data...');
+                const response = await fetch('/api/consumption');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (!Array.isArray(data) || data.length === 0) {
+                    throw new Error('No consumption data found or invalid format');
+                }
+                console.log('Fetched consumption data:', data); // Log the fetched data
+                calculateEnvironmentalImpact(data);
+            } catch (error) {
+                console.error('Error fetching consumption data:', error);
+                setError('Failed to fetch consumption data. Please try again later.');
+            }
+        };
+
+        fetchConsumptionData();
+    }, []);
+
+    const calculateEnvironmentalImpact = (data) => {
+        const yearlyConsumption = {};
+
+        data.forEach(item => {
+            if (!item.date || !item.consumption) {
+                console.error('Invalid data format:', item);
+                return;
+            }
+
+            const date = new Date(item.date);
+            if (isNaN(date.getTime())) {
+                console.error('Invalid date format:', item.date);
+                return;
+            }
+
+            const year = date.getFullYear();
+
+            // Aggregate yearly consumption
+            if (!yearlyConsumption[year]) {
+                yearlyConsumption[year] = 0;
+            }
+            yearlyConsumption[year] += item.consumption;
+        });
+
+        const totalYearlyConsumption = Object.values(yearlyConsumption).reduce((sum, value) => sum + value, 0);
+
+        console.log('Total yearly consumption:', totalYearlyConsumption); // Log total yearly consumption
+
+        const carbonFootprintYearly = totalYearlyConsumption * 0.92; // Example conversion factor
+        const treesSavedYearly = totalYearlyConsumption * 0.06; // Example conversion factor
+
+        console.log('Carbon footprint (yearly):', carbonFootprintYearly); // Log carbon footprint (yearly)
+        console.log('Trees saved (yearly):', treesSavedYearly); // Log trees saved (yearly)
+
+        setCarbonFootprint(carbonFootprintYearly);
+        setTreesSaved(treesSavedYearly);
     };
 
     return (
         <React.Fragment>
+            {console.log('Rendering CarbonFootprintCard...')}
             {isLoading ? (
                 <SkeletonTotalOrderCard />
+            ) : error ? (
+                <Typography variant="body2" color="error">{error}</Typography>
             ) : (
                 <MainCard border={false} className={classes.card} contentClass={classes.content}>
                     <Grid container direction="column">
@@ -116,26 +170,8 @@ const TotalOrderLineChartCard = ({ isLoading }) => {
                             <Grid container justifyContent="space-between">
                                 <Grid item>
                                     <Avatar variant="rounded" className={classes.avatar}>
-                                        <LocalMallOutlinedIcon fontSize="inherit" />
+                                        <EcoIcon fontSize="inherit" />
                                     </Avatar>
-                                </Grid>
-                                <Grid item>
-                                    <Button
-                                        disableElevation
-                                        variant={timeValue ? 'contained' : 'string'}
-                                        size="small"
-                                        onClick={(e) => handleChangeTime(e, true)}
-                                    >
-                                        Month
-                                    </Button>
-                                    <Button
-                                        disableElevation
-                                        variant={!timeValue ? 'contained' : 'string'}
-                                        size="small"
-                                        onClick={(e) => handleChangeTime(e, false)}
-                                    >
-                                        Year
-                                    </Button>
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -144,11 +180,7 @@ const TotalOrderLineChartCard = ({ isLoading }) => {
                                 <Grid item xs={6}>
                                     <Grid container alignItems="center">
                                         <Grid item>
-                                            {timeValue ? (
-                                                <Typography className={classes.cardHeading}>$108</Typography>
-                                            ) : (
-                                                <Typography className={classes.cardHeading}>$961</Typography>
-                                            )}
+                                            <Typography className={classes.cardHeading}>{carbonFootprint.toFixed(2)} kg CO2</Typography>
                                         </Grid>
                                         <Grid item>
                                             <Avatar className={classes.avatarCircle}>
@@ -156,12 +188,14 @@ const TotalOrderLineChartCard = ({ isLoading }) => {
                                             </Avatar>
                                         </Grid>
                                         <Grid item xs={12}>
-                                            <Typography className={classes.subHeading}>Total Order</Typography>
+                                            <Typography className={classes.subHeading}>Carbon Footprint</Typography>
                                         </Grid>
                                     </Grid>
                                 </Grid>
                                 <Grid item xs={6}>
-                                    {timeValue ? <Chart {...ChartDataMonth} /> : <Chart {...ChartDataYear} />}
+                                    <Typography className={classes.cardHeading}>
+                                        {treesSaved.toFixed(2)} Trees Saved
+                                    </Typography>
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -172,8 +206,12 @@ const TotalOrderLineChartCard = ({ isLoading }) => {
     );
 };
 
-TotalOrderLineChartCard.propTypes = {
+CarbonFootprintCard.propTypes = {
     isLoading: PropTypes.bool
 };
 
-export default TotalOrderLineChartCard;
+CarbonFootprintCard.defaultProps = {
+    isLoading: false
+};
+
+export default CarbonFootprintCard;
