@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import QRCode from 'qrcode';
 
 // material-ui
 import { Card, CardContent, Typography, Button, Grid } from '@material-ui/core';
@@ -24,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 // Function to generate payment receipt with jsPDF and jsPDF-autotable
-const generatePaymentReceipt = (payment) => {
+const generatePaymentReceipt = async (payment) => {
     const doc = new jsPDF();
 
     // Add Logo (Placeholder)
@@ -62,13 +63,24 @@ const generatePaymentReceipt = (payment) => {
         margin: { top: 10, left: 20, right: 20 }, // Margins around the table
     });
 
+    // Save the PDF locally
+    const pdfFileName = `payment_receipt_${id}.pdf`;
+    doc.save(pdfFileName);
+
+    // Generate QR Code linking to the PDF file
+    const pdfUrl = `http://localhost:3000/${pdfFileName}`; // Replace with the actual URL where the PDF is hosted
+    const qrCodeDataUrl = await QRCode.toDataURL(pdfUrl);
+
+    // Add QR Code to PDF
+    doc.addImage(qrCodeDataUrl, 'PNG', 150, 10, 50, 50); // Position (150, 10) with width 50 and height 50
+
     // Add Footer
     doc.setFontSize(10);
     doc.setTextColor(0, 0, 0); // Black color for footer text
     doc.text('Thank you for using STEG services!', 20, doc.lastAutoTable.finalY + 10);
 
-    // Save the PDF
-    doc.save(`payment_receipt_${id}.pdf`);
+    // Save the PDF with QR code
+    doc.save(pdfFileName);
 };
 
 const PaymentCard = ({ payment }) => {

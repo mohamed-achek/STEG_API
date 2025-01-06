@@ -11,7 +11,7 @@ from models import db, User, JWTTokenBlocklist
 from api.config import BaseConfig
 import requests
 
-rest_api = Api(version="1.0", title="Users API")
+rest_api = Api(version="1.0", title="STEG API", description="API for STEG application")
 
 
 """

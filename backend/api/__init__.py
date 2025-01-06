@@ -11,14 +11,20 @@ from api.consumption import consumption_bp
 from api.outages import outages_bp
 from api.payment import payment_bp
 from .model_loader import load_model_and_scaler
+from flask_restx import Api, Resource
 
 
 app = Flask(__name__)
+
+
+
+
 
 app.config.from_object('api.config.BaseConfig')
 
 db.init_app(app)
 migrate = Migrate(app, db)
+
 rest_api.init_app(app)
 CORS(app)
 
