@@ -2,10 +2,9 @@ import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 
 // material-ui
-import { Grid, MenuItem, TextField, Typography, useTheme } from '@material-ui/core';
+import { Grid, useTheme } from '@material-ui/core';
 
 // third-party
-import ApexCharts from 'apexcharts';
 import Chart from 'react-apexcharts';
 
 // project imports

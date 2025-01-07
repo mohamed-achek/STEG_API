@@ -3,7 +3,7 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
 // material-ui
-import { Typography, Grid, Button } from '@material-ui/core';
+import { Typography, Grid } from '@material-ui/core';
 
 // project imports
 import MainCard from '../../ui-component/cards/MainCard';
@@ -38,67 +38,7 @@ const useFetchPaymentData = () => {
     return { paymentData, isLoading };
 };
 
-// Function to download receipt
-const downloadReceipt = async (paymentId) => {
-    try {
-        const response = await fetch(`http://127.0.0.1:5000/api/payments/receipt/${paymentId}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `receipt_${paymentId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    } catch (error) {
-        console.error('Error downloading receipt:', error);
-    }
-};
 
-// Function to generate PDF receipt
-const generatePDFReceipt = () => {
-    const doc = new jsPDF();
-    const currentDate = new Date().toLocaleDateString('en-US');
-
-    doc.setFontSize(18);
-    doc.text('Receipt', 20, 20);
-
-    doc.setFontSize(12);
-    doc.text(`Date: ${currentDate}`, 20, 30);
-
-    doc.setFontSize(14);
-    doc.text('Customer Information:', 20, 40);
-    doc.setFontSize(12);
-    doc.text('Name: John Doe', 20, 50);
-    doc.text('Email: john.doe@example.com', 20, 60);
-
-    doc.setFontSize(14);
-    doc.text('Itemized List:', 20, 70);
-    doc.setFontSize(12);
-    const items = [
-        { name: 'Item 1', price: 10 },
-        { name: 'Item 2', price: 20 },
-        { name: 'Item 3', price: 30 },
-    ];
-    let yPosition = 80;
-    let total = 0;
-    items.forEach((item) => {
-        doc.text(`${item.name}: $${item.price}`, 20, yPosition);
-        yPosition += 10;
-        total += item.price;
-    });
-
-    doc.setFontSize(14);
-    doc.text(`Total: $${total}`, 20, yPosition + 10);
-
-    doc.setFontSize(12);
-    doc.text('Thank you for your purchase!', 20, yPosition + 30);
-
-    doc.save('receipt.pdf');
-};
 
 // Function to generate payment receipt with jsPDF and jsPDF-autotable
 const generatePaymentReceipt = (payment) => {

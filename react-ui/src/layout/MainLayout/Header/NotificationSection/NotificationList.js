@@ -4,9 +4,6 @@ import React from 'react';
 import { makeStyles } from '@material-ui/styles';
 import {
     Avatar,
-    Button,
-    Card,
-    CardContent,
     Chip,
     Divider,
     Grid,
@@ -15,12 +12,11 @@ import {
     ListItemAvatar,
     ListItemSecondaryAction,
     ListItemText,
-    Stack,
     Typography
 } from '@material-ui/core';
 
 // assets
-import { IconBrandTelegram, IconBuildingStore, IconMailbox, IconPhoto } from '@tabler/icons';
+import { IconCreditCard } from '@tabler/icons';
 import User1 from './../../../../assets/images/users/user.png';
 
 // style constant
@@ -112,9 +108,9 @@ const NotificationList = () => {
             <div className={classes.itemAction}>
                 <ListItem alignItems="center" className={classes.listItem}>
                     <ListItemAvatar>
-                        <Avatar alt="John Doe" src={User1} />
+                        <Avatar src={User1} />
                     </ListItemAvatar>
-                    <ListItemText primary={<Typography variant="subtitle1">John Doe</Typography>} />
+                    <ListItemText primary={<Typography variant="subtitle1">Mohamed Achek</Typography>} />
                     <ListItemSecondaryAction className={classes.listAction}>
                         <Grid container justifyContent="flex-end">
                             <Grid item xs={12}>
@@ -127,7 +123,7 @@ const NotificationList = () => {
                 </ListItem>
                 <Grid container direction="column" className={classes.listContainer}>
                     <Grid item xs={12} className={classes.paddingBottom}>
-                        <Typography variant="subtitle2">It is a long established fact that a reader will be distracted</Typography>
+                        <Typography variant="subtitle2">Unexpected outage in Mourouj (details in outages section )</Typography>
                     </Grid>
                     <Grid item xs={12}>
                         <Grid container>
@@ -145,48 +141,16 @@ const NotificationList = () => {
             <div className={classes.itemAction}>
                 <ListItem alignItems="center" className={classes.listItem}>
                     <ListItemAvatar>
-                        <Avatar className={classes.listAvatarSuccess}>
-                            <IconBuildingStore stroke={1.5} size="1.3rem" />
-                        </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText primary={<Typography variant="subtitle1">Store Verification Done</Typography>} />
-                    <ListItemSecondaryAction className={classes.listAction}>
-                        <Grid container justifyContent="flex-end">
-                            <Grid item xs={12}>
-                                <Typography variant="caption" display="block" gutterBottom className={classes.actionColor}>
-                                    2 min ago
-                                </Typography>
-                            </Grid>
-                        </Grid>
-                    </ListItemSecondaryAction>
-                </ListItem>
-                <Grid container direction="column" className={classes.listContainer}>
-                    <Grid item xs={12} className={classes.paddingBottom}>
-                        <Typography variant="subtitle2">We have successfully received your request.</Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Grid container>
-                            <Grid item>
-                                <Chip label="Unread" className={classes.listChipError} />
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </div>
-            <Divider className={classes.listDivider} />
-            <div className={classes.itemAction}>
-                <ListItem alignItems="center" className={classes.listItem}>
-                    <ListItemAvatar>
                         <Avatar className={classes.listAvatarPrimary}>
-                            <IconMailbox stroke={1.5} size="1.3rem" />
+                            <IconCreditCard stroke={1.5} size="1.3rem" />
                         </Avatar>
                     </ListItemAvatar>
-                    <ListItemText primary={<Typography variant="subtitle1">Check Your Mail.</Typography>} />
+                    <ListItemText primary={<Typography variant="subtitle1">Payment successful</Typography>} />
                     <ListItemSecondaryAction className={classes.listAction}>
                         <Grid container justifyContent="flex-end">
                             <Grid item>
                                 <Typography variant="caption" display="block" gutterBottom className={classes.actionColor}>
-                                    2 min ago
+                                    1 Hour ago
                                 </Typography>
                             </Grid>
                         </Grid>
@@ -194,91 +158,11 @@ const NotificationList = () => {
                 </ListItem>
                 <Grid container direction="column" className={classes.listContainer}>
                     <Grid item xs={12} className={classes.paddingBottom}>
-                        <Typography variant="subtitle2">All done! Now check your inbox as you're in for a sweet treat!</Typography>
+                        <Typography variant="subtitle2">Your payment receipt is available !</Typography>
                     </Grid>
                     <Grid item xs={12}>
                         <Grid container>
                             <Grid item>
-                                <Button variant="contained" disableElevation>
-                                    Mail
-                                    <IconBrandTelegram stroke={1.5} size="1.3rem" className={classes.sendIcon} />
-                                </Button>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </div>
-            <Divider className={classes.listDivider} />
-            <div className={classes.itemAction}>
-                <ListItem alignItems="center" className={classes.listItem}>
-                    <ListItemAvatar>
-                        <Avatar alt="John Doe" src={User1} />
-                    </ListItemAvatar>
-                    <ListItemText primary={<Typography variant="subtitle1">John Doe</Typography>} />
-                    <ListItemSecondaryAction className={classes.listAction}>
-                        <Grid container justifyContent="flex-end">
-                            <Grid item xs={12}>
-                                <Typography variant="caption" display="block" gutterBottom className={classes.actionColor}>
-                                    2 min ago
-                                </Typography>
-                            </Grid>
-                        </Grid>
-                    </ListItemSecondaryAction>
-                </ListItem>
-                <Grid container direction="column" className={classes.listContainer}>
-                    <Grid item xs={12} className={classes.paddingBottom}>
-                        <Typography component="span" variant="subtitle2">
-                            Uploaded two file on &nbsp;
-                            <Typography component="span" variant="h6">
-                                21 Jan 2020
-                            </Typography>
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Grid container>
-                            <Grid item xs={12}>
-                                <Card className={classes.uploadCard}>
-                                    <CardContent>
-                                        <Grid container direction="column">
-                                            <Grid item xs={12}>
-                                                <Stack direction="row" spacing={2}>
-                                                    <IconPhoto stroke={1.5} size="1.3rem" />
-                                                    <Typography variant="subtitle1">demo.jpg</Typography>
-                                                </Stack>
-                                            </Grid>
-                                        </Grid>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </div>
-            <Divider className={classes.listDivider} />
-            <div className={classes.itemAction}>
-                <ListItem alignItems="center" className={classes.listItem}>
-                    <ListItemAvatar>
-                        <Avatar alt="John Doe" src={User1} />
-                    </ListItemAvatar>
-                    <ListItemText primary={<Typography variant="subtitle1">John Doe</Typography>} />
-                    <ListItemSecondaryAction className={classes.listAction}>
-                        <Grid container justifyContent="flex-end">
-                            <Grid item xs={12}>
-                                <Typography variant="caption" display="block" gutterBottom className={classes.actionColor}>
-                                    2 min ago
-                                </Typography>
-                            </Grid>
-                        </Grid>
-                    </ListItemSecondaryAction>
-                </ListItem>
-                <Grid container direction="column" className={classes.listContainer}>
-                    <Grid item xs={12} className={classes.paddingBottom}>
-                        <Typography variant="subtitle2">It is a long established fact that a reader will be distracted</Typography>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Grid container>
-                            <Grid item>
-                                <Chip label="Confirmation of Account." className={classes.listChipSuccess} />
                             </Grid>
                         </Grid>
                     </Grid>
