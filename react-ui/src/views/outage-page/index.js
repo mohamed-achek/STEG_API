@@ -144,7 +144,7 @@ const OutagePage = () => {
                             Current Outages
                         </Typography>
                         <LoadScript
-                            googleMapsApiKey="" // Add your Google Maps API key here
+                            googleMapsApiKey="AIzaSyCfxINQ2oXlI-JDMx0BEvcvxKTDvqdd5Gc" // Add your Google Maps API key here
                             libraries={libraries}
                             onLoad={handleLoad}
                         >
