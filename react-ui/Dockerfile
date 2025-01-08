@@ -1,22 +1,26 @@
-# pull official base image
-FROM node:14-alpine
+# Use a Node.js image as base image
+FROM node:18
 
-# set working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
+# Copy package.json and package-lock.json first to install dependencies
+COPY package*.json ./
 
-# install app dependencies
-COPY package.json ./
-RUN npm install --silent
-RUN npm install react-scripts@4.0.0 -g --silent
+# Install dependencies
+RUN npm install
 
-# add app
-COPY . ./
+# Copy the rest of the frontend code
+COPY . .
 
-# Expose port
+# Build the React app for production
+RUN npm run build
+
+# Use a simple web server to serve the built files (e.g., serve)
+RUN npm install -g serve
+
+# Expose the port (default for React apps is 3000)
 EXPOSE 3000
 
-# start app
-CMD ["npm", "start"]
+# Start the app using 'serve' to serve the production build
+CMD ["serve", "-s", "build", "-l", "3000"]
