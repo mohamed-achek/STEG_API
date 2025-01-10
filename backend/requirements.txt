@@ -10,3 +10,10 @@ requests==2.31.0
 Flask-Mail==0.9.1  # For email notifications
 flask_jwt_extended
 flask_restx
+numpy
+reportlab
+tensorflow
+pandas
+scikit-learn
+scipy
+
