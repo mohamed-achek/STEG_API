@@ -53,9 +53,23 @@ const BillingPage = () => {
         fetchBills();
     }, []);
 
-    const handlePay = (id) => {
-        // Implement the pay functionality
-        console.log(`Pay bill with ID: ${id}`);
+    const handlePay = async (id) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/api/bills/${id}/pay`, {
+                method: 'POST',
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            // Update the bill status in the state
+            setBills((prevBills) =>
+                prevBills.map((bill) =>
+                    bill.id === id ? { ...bill, paid: true, payment_date: new Date().toISOString() } : bill
+                )
+            );
+        } catch (error) {
+            console.error('Error paying bill:', error);
+        }
     };
 
     const handleDownload = async (id) => {
@@ -78,11 +92,6 @@ const BillingPage = () => {
         }
     };
 
-    const handleDelete = (id) => {
-        // Implement the delete functionality
-        console.log(`Delete bill with ID: ${id}`);
-    };
-
     return (
         <MainCard title="Billing">
             {isLoading ? (
@@ -92,7 +101,7 @@ const BillingPage = () => {
                     {bills && bills.length > 0 ? (
                         bills.map((bill) => (
                             <Grid item xs={12} sm={6} md={4} key={bill.id}>
-                                <BillCard bill={bill} onPay={handlePay} onDownload={handleDownload} onDelete={handleDelete} />
+                                <BillCard bill={bill} onPay={handlePay} onDownload={handleDownload} />
                             </Grid>
                         ))
                     ) : (

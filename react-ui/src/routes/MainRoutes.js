@@ -14,6 +14,7 @@ const SamplePage = Loadable(lazy(() => import('../views/outage-page')));
 const ConsumptionPage = Loadable(lazy(() => import('../views/consumption-page'))); // Add consumption page routing
 const BillingPage = Loadable(lazy(() => import('../views/billing-page'))); // Add billing page routing
 const PaymentPage = Loadable(lazy(() => import('../views/payment-page'))); // Add payment page routing
+const CheckoutPage = Loadable(lazy(() => import('../views/billing-page/Checkoutpage'))); // Add checkout page routing
 
 //-----------------------|| MAIN ROUTING ||-----------------------//
 
@@ -27,7 +28,8 @@ const MainRoutes = () => {
                 '/sample-page',
                 '/consumption-page',
                 '/billing-page',
-                '/payment-page',  // Add payment page path
+                '/payment-page',
+                '/checkout/:id',  // Add checkout page path
                 '/login'  // Add login page path
             ]}
         >
@@ -39,6 +41,7 @@ const MainRoutes = () => {
                         <Route path="/consumption-page" component={ConsumptionPage} /> {}
                         <Route path="/billing-page" component={BillingPage} /> {}
                         <Route path="/payment-page" component={PaymentPage} /> {}
+                        <Route path="/checkout/:id" component={CheckoutPage} /> 
                     </AuthGuard>
                 </Switch>
             </MainLayout>

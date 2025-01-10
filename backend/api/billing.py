@@ -62,3 +62,25 @@ def get_bills():
         return jsonify(bills_list), 200
     except Exception as e:
         return jsonify({"success": False, "msg": str(e)}), 500
+
+# Endpoint to pay a bill
+@billing_bp.route('/bills/<int:bill_id>/pay', methods=['POST'])
+def pay_bill(bill_id):
+    try:
+        req_data = request.get_json()
+        card_number = req_data.get('cardNumber')
+        expiry_date = req_data.get('expiryDate')
+        cvv = req_data.get('cvv')
+
+        
+        bill = Bill.query.get(bill_id)
+        if not bill:
+            return jsonify({"success": False, "msg": "Bill not found"}), 404
+
+        bill.paid = True
+        bill.payment_date = date.today()
+        db.session.commit()
+
+        return jsonify({"success": True, "msg": "Bill paid successfully"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "msg": str(e)}), 500
