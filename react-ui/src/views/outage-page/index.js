@@ -144,13 +144,13 @@ const OutagePage = () => {
                             Current Outages
                         </Typography>
                         <LoadScript
-                            googleMapsApiKey="AIzaSyCfxINQ2oXlI-JDMx0BEvcvxKTDvqdd5Gc" // Add your Google Maps API key here
+                            googleMapsApiKey="api key" 
                             libraries={libraries}
                             onLoad={handleLoad}
                         >
                             <GoogleMap
                                 mapContainerStyle={{ height: '400px', width: '100%' }}
-                                center={{ lat: 36.8065, lng: 10.1815 }} // Center the map to a default location
+                                center={{ lat: 36.8065, lng: 10.1815 }} 
                                 zoom={10}
                             >
                                 <HeatmapLayer 
